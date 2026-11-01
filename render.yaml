@@ -1,0 +1,14 @@
+# One-click deploy on Render.com (free tier). Add the secret env vars in the Render dashboard.
+services:
+  - type: web
+    name: kisansathi
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app
+    envVars:
+      - key: DEBUG_ENDPOINTS
+        value: "1"        # keep 1 to show the outage-simulation demo tools to judges
+      - key: DATA_GOV_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

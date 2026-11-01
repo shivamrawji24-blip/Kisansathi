@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>किसान साथी · KisanSathi</title>
+  <meta name="description" content="Voice-first farming assistant: live weather, mandi prices, where to sell, and a profit predictor, in Hindi and English.">
+  <meta name="theme-color" content="#22305f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b data-i18n="brand"></b></div>
+    <div class="lang" role="group" aria-label="Language / भाषा">
+      <button type="button" data-lang="hi" lang="hi">हिन्दी</button>
+      <button type="button" data-lang="en" lang="en">English</button>
+    </div>
+  </header>
+
+  <section class="place" aria-label="Location">
+    <div class="place-row">
+      <span class="place-label" data-i18n="loc_label"></span>
+      <strong id="place-name" class="place-name"></strong>
+      <button type="button" id="place-change" class="link" data-i18n="loc_change"></button>
+    </div>
+    <div id="place-panel" class="place-panel" hidden>
+      <form id="place-form" class="inline-form" autocomplete="off">
+        <input id="place-q" type="text" inputmode="search" data-i18n-ph="loc_search_ph" aria-label="Place" required minlength="2">
+        <button type="button" id="place-mic" class="icon-btn" aria-label="Voice"></button>
+        <button type="submit" class="btn" data-i18n="loc_search"></button>
+      </form>
+      <ul id="place-results" class="results" aria-live="polite"></ul>
+    </div>
+  </section>
+
+  <div id="stale-banner" class="stale" role="status" hidden></div>
+
+  <main>
+    <!-- ASK -->
+    <section id="tab-ask" class="tab" role="tabpanel" aria-labelledby="t-ask">
+      <div class="hero">
+        <h1 data-i18n="ask_title"></h1>
+        <p class="hint" data-i18n="ask_hint"></p>
+        <button type="button" id="mic" class="mic" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 0 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H9.5a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H13v-2.59A6 6 0 0 0 18 11.5Z"/></svg>
+          <span class="sr" id="mic-label"></span>
+        </button>
+        <p id="mic-status" class="mic-status" role="status"></p>
+        <form id="ask-form" class="ask-form" autocomplete="off">
+          <input id="ask-q" type="text" data-i18n-ph="ask_ph" aria-label="Question" maxlength="500">
+          <button type="submit" class="btn btn-accent" data-i18n="ask_send"></button>
+        </form>
+        <div class="examples" id="examples"></div>
+      </div>
+      <p id="agent-mode" class="mode"></p>
+      <div id="thread" class="thread" aria-live="polite"></div>
+    </section>
+
+    <!-- SELL -->
+    <section id="tab-sell" class="tab" role="tabpanel" aria-labelledby="t-sell" hidden>
+      <h2 data-i18n="sell_title"></h2>
+      <form id="sell-form" class="form" novalidate>
+        <div class="grid">
+          <label class="fld"><span data-i18n="f_crop"></span><select name="crop" class="crop-select" required></select></label>
+          <label class="fld"><span data-i18n="f_qty"></span><input name="quantity_q" type="number" inputmode="decimal" min="0.1" step="any" value="40" required></label>
+          <label class="fld"><span data-i18n="f_vehicle"></span>
+            <select name="vehicle"><option value="open" data-i18n="v_open"></option><option value="covered" data-i18n="v_covered"></option><option value="reefer" data-i18n="v_reefer"></option></select></label>
+          <label class="fld"><span data-i18n="f_costkm"></span><input name="cost_per_km" type="number" inputmode="decimal" min="0" step="any" value="20"></label>
+          <label class="fld"><span data-i18n="f_comm"></span><input name="commission_pct" type="number" inputmode="decimal" min="0" max="15" step="any" value="0"></label>
+        </div>
+        <button type="submit" class="btn btn-accent wide" data-i18n="sell_go"></button>
+      </form>
+      <div id="sell-out" class="out" aria-live="polite"></div>
+    </section>
+
+    <!-- PROFIT -->
+    <section id="tab-profit" class="tab" role="tabpanel" aria-labelledby="t-profit" hidden>
+      <h2 data-i18n="profit_title"></h2>
+      <form id="profit-form" class="form" novalidate>
+        <fieldset>
+          <legend data-i18n="sec_field"></legend>
+          <div class="grid">
+            <label class="fld"><span data-i18n="f_crop"></span><select name="crop" class="crop-select" required></select></label>
+            <label class="fld"><span data-i18n="f_area"></span><input name="area_acres" type="number" inputmode="decimal" min="0.1" step="any" value="2" required></label>
+            <label class="fld"><span data-i18n="f_soil"></span>
+              <select name="soil_fertility"><option value="low" data-i18n="low"></option><option value="medium" data-i18n="medium" selected></option><option value="high" data-i18n="high"></option></select></label>
+            <label class="fld"><span data-i18n="f_irr"></span>
+              <select name="irrigation"><option value="rainfed" data-i18n="rainfed"></option><option value="canal" data-i18n="canal"></option><option value="tubewell" data-i18n="tubewell" selected></option><option value="drip" data-i18n="drip"></option></select></label>
+            <label class="fld"><span data-i18n="f_seed"></span>
+              <select name="seed_quality"><option value="farmer_saved" data-i18n="farmer_saved"></option><option value="certified" data-i18n="certified" selected></option><option value="hybrid" data-i18n="hybrid"></option></select></label>
+            <label class="fld"><span data-i18n="f_pest"></span>
+              <select name="pest_management"><option value="none" data-i18n="none"></option><option value="basic" data-i18n="basic" selected></option><option value="ipm" data-i18n="ipm"></option></select></label>
+            <label class="fld"><span data-i18n="f_delay"></span><input name="sowing_delay_days" type="number" inputmode="numeric" min="0" max="60" step="1" value="0"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend data-i18n="sec_fert"></legend>
+          <div class="grid">
+            <label class="fld"><span data-i18n="f_n"></span><input name="fertilizer_n_kg_acre" data-rec="n" type="number" inputmode="decimal" min="0" step="any"><small class="rec"></small></label>
+            <label class="fld"><span data-i18n="f_p"></span><input name="fertilizer_p2o5_kg_acre" data-rec="p" type="number" inputmode="decimal" min="0" step="any"><small class="rec"></small></label>
+            <label class="fld"><span data-i18n="f_k"></span><input name="fertilizer_k2o_kg_acre" data-rec="k" type="number" inputmode="decimal" min="0" step="any"><small class="rec"></small></label>
+            <label class="fld"><span data-i18n="f_manure"></span><input name="manure_t_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_fertcost"></span><input name="fertilizer_cost_acre" type="number" inputmode="decimal" min="0" step="any"><small data-i18n="hint_est"></small></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend data-i18n="sec_costs"></legend>
+          <div class="grid">
+            <label class="fld"><span data-i18n="f_seedcost"></span><input name="seed_cost_acre" id="seed-cost" type="number" inputmode="decimal" min="0" step="any"><small class="rec" id="seed-hint"></small></label>
+            <label class="fld"><span data-i18n="f_pestcost"></span><input name="pesticide_cost_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_labdays"></span><input name="labour_days_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_wage"></span><input name="wage_per_day" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_mach"></span><input name="machinery_cost_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_irrcost"></span><input name="irrigation_cost_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_rent"></span><input name="land_rent_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_other"></span><input name="other_cost_acre" type="number" inputmode="decimal" min="0" step="any"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend data-i18n="sec_sell"></legend>
+          <div class="grid">
+            <label class="fld"><span data-i18n="f_price"></span><input name="price_per_q" type="number" inputmode="decimal" min="1" step="any"><small data-i18n="hint_price"></small></label>
+            <label class="fld"><span data-i18n="f_trans"></span><input name="transport_per_q" type="number" inputmode="decimal" min="0" step="any"></label>
+            <label class="fld"><span data-i18n="f_comm"></span><input name="commission_pct" type="number" inputmode="decimal" min="0" max="15" step="any"></label>
+            <label class="fld"><span data-i18n="f_loss"></span><input name="post_harvest_loss_pct" type="number" inputmode="decimal" min="0" max="60" step="any"></label>
+            <label class="fld"><span data-i18n="f_msp"></span><input name="msp_per_q" type="number" inputmode="decimal" min="1" step="any"></label>
+          </div>
+        </fieldset>
+        <button type="submit" class="btn btn-accent wide" data-i18n="profit_go"></button>
+      </form>
+      <div id="profit-out" class="out" aria-live="polite"></div>
+    </section>
+
+    <!-- TODAY -->
+    <section id="tab-today" class="tab" role="tabpanel" aria-labelledby="t-today" hidden>
+      <div class="inline-form today-pick">
+        <label class="fld grow"><span data-i18n="pick_crop_optional"></span><select id="today-crop" class="crop-select"></select></label>
+      </div>
+      <h2 data-i18n="today_title"></h2>
+      <div id="weather-out" class="out" aria-live="polite"></div>
+      <h2 data-i18n="today_prices"></h2>
+      <div id="mandi-out" class="out" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p data-i18n="footer"></p>
+    <details id="demo" class="demo">
+      <summary data-i18n="demo_title"></summary>
+      <p data-i18n="demo_hint"></p>
+      <div id="demo-toggles" class="toggles"></div>
+    </details>
+  </footer>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="t-ask" data-tab="ask" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 0 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H9.5a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H13v-2.59A6 6 0 0 0 18 11.5Z"/></svg><span data-i18n="tab_ask"></span></button>
+    <button role="tab" id="t-sell" data-tab="sell" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 10.5 4.5 5h15L21 10.5V12a2.5 2.5 0 0 1-4 2 2.5 2.5 0 0 1-4.5 0 2.5 2.5 0 0 1-4.5 0A2.5 2.5 0 0 1 3 12Zm2 4.5a4.5 4.5 0 0 0 1.5-.3V19h11v-4.3a4.5 4.5 0 0 0 1.5.3V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/></svg><span data-i18n="tab_sell"></span></button>
+    <button role="tab" id="t-profit" data-tab="profit" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14v2.5h-4.2A4 4 0 0 1 17 8.5h2V11h-2.3a5 5 0 0 1-5 4.5H11l6.5 5.5H14l-6-5.1V14h3.6a2.7 2.7 0 0 0 2.7-3H5V8.5h9.1A2.5 2.5 0 0 0 11.6 5.5H5Z"/></svg><span data-i18n="tab_profit"></span></button>
+    <button role="tab" id="t-today" data-tab="today" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 18a4.5 4.5 0 0 1-.5-8.97A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1 0 8.5Zm1.4 2.2 1.6-2.7h1.7l-1.6 2.7Zm4.4 0 1.6-2.7h1.7l-1.6 2.7Z"/></svg><span data-i18n="tab_today"></span></button>
+  </nav>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
