@@ -145,5 +145,3 @@ Errors are JSON with `message.en` and `message.hi`: `422` invalid or missing inp
 4. **Weather and prices:** show the merged heat or rain alert.
 5. **Resilience:** open *Demo tools*, switch off a source, show the *saved copy* banner; enter an unknown crop or no location and show the specific error message.
 6. Toggle Hindi/English.
-#   K i s a n s a t h i  
- 
